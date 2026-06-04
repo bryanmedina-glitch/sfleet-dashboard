@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sfleet — Dashboard Ejecutivo de Flota</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue-dark:#1F4E79;
+  --blue-mid:#2E75B6;
+  --blue-light:#BDD7EE;
+  --blue-bg:#EBF3FB;
+  --amber:#ED7D31;
+  --green:#70AD47;
+  --red:#C0392B;
+  --bg:#F4F7FB;
+  --white:#FFFFFF;
+  --border:#D6E4F0;
+  --text:#1a2e42;
+  --text-muted:#7A94A8;
+  --shadow:0 1px 4px rgba(31,78,121,.08);
+  --shadow-md:0 4px 16px rgba(31,78,121,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min-height:100vh}
+/* TOPBAR */
+.topbar{background:var(--blue-dark);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo{font-size:18px;font-weight:700;color:#fff;letter-spacing:1px}
+.topbar-logo span{color:var(--amber)}
+.topbar-period{font-size:11px;color:var(--blue-light);letter-spacing:1.5px;text-transform:uppercase;border-left:1px solid rgba(255,255,255,.2);padding-left:14px}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.last-update{font-size:11px;color:var(--blue-light);font-family:'DM Mono',monospace}
+.refresh-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;padding:5px 12px;border-radius:6px;font-size:11px;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif}
+.refresh-btn:hover{background:rgba(255,255,255,.2)}
+/* MAIN */
+.main{padding:24px 28px;max-width:1400px;margin:0 auto}
+/* NAV TABS */
+.nav-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:22px}
+.nav-btn{background:var(--white);border:1px solid var(--border);color:var(--blue-mid);padding:7px 14px;font-size:12px;border-radius:7px;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;font-weight:500}
+.nav-btn:hover{border-color:var(--blue-mid);background:var(--blue-bg)}
+.nav-btn.active{background:var(--blue-dark);color:#fff;border-color:var(--blue-dark)}
+.nav-btn.general-btn{background:var(--blue-bg);border-color:var(--blue-mid);font-weight:600}
+.nav-btn.general-btn.active{background:var(--blue-dark);color:#fff}
+/* VIEWS */
+.view{display:none}
+.view.active{display:block}
+/* SECTION TITLE */
+.section-title{font-size:10px;color:var(--blue-mid);letter-spacing:2px;text-transform:uppercase;font-weight:600;margin-bottom:12px}
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:22px}
+.kpi{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px 14px;box-shadow:var(--shadow)}
+.kpi-label{font-size:10px;color:var(--text-muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.kpi-val{font-size:20px;font-weight:700;color:var(--blue-dark);font-family:'DM Mono',monospace}
+.kpi-sub{font-size:11px;margin-top:4px;font-weight:500}
+.up{color:var(--amber)}.down{color:var(--green)}.neutral{color:var(--text-muted)}
+/* MONTH TRACK */
+.month-track{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:22px}
+.month-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 12px;text-align:center;box-shadow:var(--shadow);transition:.2s}
+.month-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.month-card.peak{border-color:var(--blue-mid);border-width:2px}
+.month-card.low{border-color:var(--green);border-width:2px}
+.month-lbl{font-size:10px;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.month-val{font-size:14px;font-weight:700;color:var(--blue-dark);font-family:'DM Mono',monospace}
+.month-fol{font-size:10px;color:var(--text-muted);margin-top:3px}
+.month-chg{font-size:11px;font-weight:700;margin-top:5px}
+.bar-mini{height:3px;border-radius:2px;margin-top:8px;background:var(--blue-bg);overflow:hidden}
+.bar-mini-fill{height:3px;background:var(--blue-mid);border-radius:2px}
+/* EXEC GRID */
+.exec-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:22px}
+.exec-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.exec-card-label{font-size:9px;color:var(--blue-mid);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.exec-card-text{font-size:12px;color:#4a5568;line-height:1.7}
+/* CLIENT HEADER */
+.client-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:10px}
+.client-name{font-size:24px;font-weight:700;color:var(--blue-dark)}
+.client-tipo{font-size:11px;color:var(--blue-mid);font-weight:500;margin-top:3px;letter-spacing:.5px}
+/* SPARKBAR */
+.sparkbar-wrap{background:var(--blue-light);border-radius:4px;height:5px;margin-bottom:20px;overflow:hidden}
+.sparkbar{height:5px;border-radius:4px;background:linear-gradient(90deg,var(--blue-mid),var(--blue-dark))}
+/* RANK TABLE */
+.rank-wrap{background:var(--white);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px;box-shadow:var(--shadow)}
+.rank-table{width:100%;border-collapse:collapse;font-size:12px}
+.rank-table th{font-size:9px;color:var(--blue-mid);letter-spacing:1.5px;text-transform:uppercase;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--blue-bg);font-weight:600;text-align:left}
+.rank-table td{padding:9px 14px;border-bottom:1px solid #f0f5fa;vertical-align:middle}
+.rank-table tr:last-child td{border-bottom:none}
+.rank-table tr:hover td{background:#fafcff}
+.rank-num{font-size:11px;color:var(--text-muted);width:28px;font-family:'DM Mono',monospace}
+.rank-bar-wrap{background:var(--blue-bg);border-radius:3px;height:5px;width:80px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:8px}
+.rank-bar-fill{height:5px;background:var(--blue-mid);border-radius:3px}
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;margin-left:4px}
+.badge-up{background:#FEF0E4;color:#C46012}
+.badge-down{background:#EAF3DE;color:#4A7C25}
+.badge-alert{background:#FDECEA;color:var(--red)}
+.badge-new{background:#EBF3FB;color:var(--blue-mid)}
+/* DIVIDER */
+.divider{height:1px;background:var(--border);margin:16px 0}
+/* ACTION BTNS */
+.action-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-primary{background:var(--blue-dark);border:none;color:#fff;padding:8px 16px;font-size:11px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:.2s}
+.btn-primary:hover{background:#174070}
+.btn-secondary{background:var(--white);border:1px solid var(--border);color:var(--blue-mid);padding:8px 16px;font-size:11px;border-radius:7px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;transition:.2s}
+.btn-secondary:hover{border-color:var(--blue-mid);background:var(--blue-bg)}
+/* LOADING */
+.loading{text-align:center;padding:60px 20px;color:var(--text-muted);font-size:14px}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--blue-light);border-top-color:var(--blue-dark);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ERROR */
+.error-box{background:#fff5f5;border:1px solid #fdc5c5;border-radius:10px;padding:20px;margin:20px 0;font-size:13px;color:#c0392b}
+/* RESPONSIVE */
+@media(max-width:700px){
+  .main{padding:16px}
+  .exec-grid{grid-template-columns:1fr}
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .topbar{padding:0 16px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">S<span>fleet</span></div>
+    <div class="topbar-period">Dashboard Ejecutivo de Flota</div>
+  </div>
+  <div class="topbar-right">
+    <span class="last-update" id="last-update">Cargando...</span>
+    <button class="refresh-btn" onclick="loadData()">↻ Actualizar</button>
+  </div>
+</div>
+
+<div class="main">
+  <div id="loading" class="loading">
+    <div class="loading-spinner"></div>
+    Cargando datos desde Google Sheets...
+  </div>
+  <div id="content" style="display:none">
+    <div class="nav-wrap" id="nav"></div>
+    <div id="views"></div>
+  </div>
+  <div id="error" class="error-box" style="display:none"></div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// CONFIG — SOLO CAMBIA ESTE ID CUANDO PUBLIQUES TU SHEET
+// ─────────────────────────────────────────────────────────────
+// URL directa publicada desde Google Sheets (Archivo → Publicar en la web → CSV)
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTsY3ohIWJOhuAegpLiZhQBLRr-kDJAw-wsNyGJwTEReiIKoVEM4RQrCXYihsmw9xVkmwVgLD-9FkLu/pub?gid=0&single=true&output=csv';
+
+function getSheetUrl(){
+  return SHEET_CSV_URL;
+}
+
+// ─────────────────────────────────────────────────────────────
+// PARSE CSV → objetos por cliente y mes
+// ─────────────────────────────────────────────────────────────
+function parseCSV(text){
+  const lines = text.trim().split('\n').map(l=>l.split(',').map(c=>c.replace(/^"|"$/g,'').trim()));
+  const headers = lines[0];
+  return lines.slice(1).map(row=>{
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=row[i]||'');
+    return obj;
+  });
+}
+
+function buildClientData(rows){
+  // Espera columnas: fecha, cliente, subtotal, diferencia, folios, subtotal_sfleet
+  const map={};
+  const mesOrder=[];
+
+  rows.forEach(r=>{
+    if(!r.cliente||!r.fecha) return;
+    const dateStr = r.fecha.substring(0,7); // YYYY-MM
+    if(!mesOrder.includes(dateStr)) mesOrder.push(dateStr);
+    if(!map[r.cliente]) map[r.cliente]={};
+    if(!map[r.cliente][dateStr]){
+      map[r.cliente][dateStr]={sub:0,fol:0};
+    }
+    map[r.cliente][dateStr].sub += parseFloat(r.subtotal)||0;
+    map[r.cliente][dateStr].fol += parseInt(r.folios)||0;
+  });
+
+  mesOrder.sort();
+  const mesLabels = mesOrder.map(m=>{
+    const [y,mo]=m.split('-');
+    const names=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return names[parseInt(mo)-1]+' '+y.substring(2);
+  });
+
+  const clients = Object.keys(map).map(name=>{
+    const sub=mesOrder.map(m=>map[name][m]?map[name][m].sub:0);
+    const fol=mesOrder.map(m=>map[name][m]?map[name][m].fol:0);
+    return{name,sub,fol};
+  }).sort((a,b)=>b.sub.reduce((x,y)=>x+y,0)-a.sub.reduce((x,y)=>x+y,0));
+
+  return{clients,mesOrder,mesLabels};
+}
+
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
+function fmt(n){
+  if(n>=1000000) return'$'+(n/1000000).toFixed(2)+'M';
+  if(n>=1000) return'$'+(n/1000).toFixed(0)+'k';
+  return'$'+Math.round(n).toLocaleString();
+}
+function fmtFull(n){return'$'+Math.round(n).toLocaleString('es-MX')}
+function fmtPct(n){return(n>0?'+':'')+n.toFixed(1)+'%'}
+function pct(a,b){return b===0?null:((a-b)/b)*100}
+
+// ─────────────────────────────────────────────────────────────
+// GENERAL VIEW
+// ─────────────────────────────────────────────────────────────
+function buildGeneral(clients, mesLabels){
+  const n = mesLabels.length;
+  const totSub = Array.from({length:n},(_,i)=>clients.reduce((s,c)=>s+c.sub[i],0));
+  const totFol = Array.from({length:n},(_,i)=>clients.reduce((s,c)=>s+c.fol[i],0));
+  const grandTotal = totSub.reduce((a,b)=>a+b,0);
+  const grandFol = totFol.reduce((a,b)=>a+b,0);
+  const maxMes = Math.max(...totSub);
+  const lastSub = totSub[n-1], prevSub = totSub[n-2]||0;
+  const lastFol = totFol[n-1];
+  const cpfLast = lastFol>0?Math.round(lastSub/lastFol):0;
+  const momLast = pct(lastSub,prevSub);
+  const trendTotal = totSub[0]>0?pct(lastSub,totSub[0]):null;
+
+  const momArr = totSub.map((v,i)=>i===0?null:pct(v,totSub[i-1]));
+
+  let monthCards='';
+  for(let i=0;i<n;i++){
+    const isPeak = totSub[i]===maxMes;
+    const mom = momArr[i];
+    const momClass = mom===null?'neutral':mom>5?'up':mom<-5?'down':'neutral';
+    const barW = Math.round(totSub[i]/maxMes*100);
+    monthCards+=`<div class="month-card${isPeak?' peak':''}">
+      <div class="month-lbl">${mesLabels[i]}${isPeak?' ★':''}</div>
+      <div class="month-val">${fmt(totSub[i])}</div>
+      <div class="month-fol">${totFol[i].toLocaleString()} folios</div>
+      <div class="month-chg ${momClass}">${mom!==null?fmtPct(mom):'base'}</div>
+      <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%"></div></div>
+    </div>`;
+  }
+
+  const maxTotal = clients[0].sub.reduce((a,b)=>a+b,0);
+  let rankRows='';
+  clients.forEach((c,i)=>{
+    const tot = c.sub.reduce((a,b)=>a+b,0);
+    const ene = c.sub[0], last = c.sub[n-1];
+    const trend = ene>0?pct(last,ene):null;
+    const tClass = trend===null?'neutral':trend>10?'up':trend<-10?'down':'neutral';
+    const tLabel = trend!==null?fmtPct(trend):'nuevo';
+    const share = Math.round(tot/grandTotal*100);
+    const barW = Math.round(tot/maxTotal*100);
+    const isAlert = trend!==null&&trend<-20;
+    const isNew = ene===0&&last>0;
+    rankRows+=`<tr>
+      <td class="rank-num">${i+1}</td>
+      <td style="font-weight:600;color:var(--blue-dark)">${c.name}</td>
+      <td style="font-weight:700;color:var(--blue-dark);font-family:'DM Mono',monospace">${fmt(tot)}
+        <div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${barW}%"></div></div>
+      </td>
+      <td style="text-align:center;color:var(--text-muted);font-family:'DM Mono',monospace">${share}%</td>
+      <td style="text-align:center">
+        <span class="${tClass}" style="font-weight:700;font-family:'DM Mono',monospace">${tLabel}</span>
+        ${isAlert?'<span class="badge badge-alert">⚠ riesgo</span>':''}
+        ${isNew?'<span class="badge badge-new">nuevo</span>':''}
+      </td>
+      <td style="text-align:center;color:var(--text-muted);font-family:'DM Mono',monospace">${c.fol.reduce((a,b)=>a+b,0)}</td>
+    </tr>`;
+  });
+
+  const withHistory = clients.filter(c=>c.sub[0]>0&&c.sub[n-1]>0);
+  const topGrower = withHistory.length?withHistory.slice().sort((a,b)=>pct(b.sub[n-1],b.sub[0])-pct(a.sub[n-1],a.sub[0]))[0]:null;
+  const topRisk = withHistory.length?withHistory.slice().sort((a,b)=>pct(a.sub[n-1],a.sub[0])-pct(b.sub[n-1],b.sub[0]))[0]:null;
+  const newOnes = clients.filter(c=>c.sub[0]===0&&c.sub[n-1]>0).map(c=>c.name).join(', ')||'Ninguno';
+  const top1 = clients[0];
+  const top1Share = Math.round(top1.sub.reduce((a,b)=>a+b,0)/grandTotal*100);
+  const firstMes = mesLabels[0], lastMes = mesLabels[n-1];
+
+  return`
+    <div style="margin-bottom:20px">
+      <div style="font-size:24px;font-weight:700;color:var(--blue-dark)">Resumen General del Portafolio</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">${clients.length} clientes activos · Responsible payment: Sfleet · ${firstMes} – ${lastMes}</div>
+    </div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Gasto total período</div><div class="kpi-val">${fmt(grandTotal)}</div><div class="kpi-sub neutral">${firstMes}–${lastMes}</div></div>
+      <div class="kpi"><div class="kpi-label">Gasto ${lastMes}</div><div class="kpi-val">${fmt(lastSub)}</div><div class="kpi-sub ${momLast&&momLast>0?'up':'down'}">${momLast?fmtPct(momLast):''} vs mes ant.</div></div>
+      <div class="kpi"><div class="kpi-label">Folios totales</div><div class="kpi-val">${grandFol.toLocaleString()}</div><div class="kpi-sub neutral">${lastFol.toLocaleString()} en ${lastMes}</div></div>
+      <div class="kpi"><div class="kpi-label">Costo / folio ${lastMes}</div><div class="kpi-val">${fmtFull(cpfLast)}</div><div class="kpi-sub neutral">MXN por servicio</div></div>
+    </div>
+    <div class="section-title">Evolución mensual del portafolio</div>
+    <div class="month-track">${monthCards}</div>
+    <div class="section-title">Ranking de clientes por gasto total</div>
+    <div class="rank-wrap"><table class="rank-table">
+      <thead><tr><th>#</th><th>Cliente</th><th>Gasto total</th><th>Participación</th><th>Variación</th><th>Folios</th></tr></thead>
+      <tbody>${rankRows}</tbody>
+    </table></div>
+    <div class="section-title">Análisis ejecutivo del portafolio</div>
+    <div class="exec-grid">
+      <div class="exec-card"><div class="exec-card-label">Tendencia general</div>
+        <div class="exec-card-text">El portafolio cerró ${lastMes} en <strong>${fmt(lastSub)}</strong> (${trendTotal?fmtPct(trendTotal):''} vs ${firstMes}). ${lastMes} fue el mes${totSub.indexOf(maxMes)===n-1?' de mayor gasto':' con variación de '+fmtPct(momLast||0)+' vs mes anterior'}. Total acumulado: ${fmt(grandTotal)}.</div>
+      </div>
+      <div class="exec-card"><div class="exec-card-label">Riesgo de concentración</div>
+        <div class="exec-card-text"><strong>${top1.name}</strong> representa el <strong>${top1Share}%</strong> del gasto total del portafolio. Su variación mensual arrastra los resultados generales. ${top1Share>55?'Nivel de concentración crítico: evaluar estrategia de diversificación.':'Concentración alta pero manejable.'}</div>
+      </div>
+      <div class="exec-card"><div class="exec-card-label">Mayor crecimiento</div>
+        <div class="exec-card-text">${topGrower?`<strong>${topGrower.name}</strong> lidera el crecimiento con <strong>${fmtPct(pct(topGrower.sub[n-1],topGrower.sub[0]))}</strong> en el período. `:''}Clientes nuevos incorporados: <strong>${newOnes}</strong>.</div>
+      </div>
+      <div class="exec-card"><div class="exec-card-label">Alerta y recomendación</div>
+        <div class="exec-card-text">${topRisk&&pct(topRisk.sub[n-1],topRisk.sub[0])<-10?`<strong>${topRisk.name}</strong> muestra contracción de ${fmtPct(pct(topRisk.sub[n-1],topRisk.sub[0]))}. Contacto proactivo recomendado. `:'Portafolio en crecimiento. '}Benchmarcar costo/folio <strong>${fmtFull(cpfLast)}</strong> contra industria.</div>
+      </div>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// CLIENT VIEW
+// ─────────────────────────────────────────────────────────────
+function buildClientView(c, mesLabels, maxTotal){
+  const n = mesLabels.length;
+  const sub=c.sub, fol=c.fol;
+  const total=sub.reduce((a,b)=>a+b,0);
+  const lastSub=sub[n-1], prevSub=sub[n-2]||0;
+  const lastFol=fol[n-1];
+  const ene=sub[0];
+  const momLast=pct(lastSub,prevSub);
+  const trendTotal=ene>0?pct(lastSub,ene):null;
+  const maxV=Math.max(...sub);
+  const nonZero=sub.filter(v=>v>0);
+  const minV=nonZero.length?Math.min(...nonZero):0;
+  const cpfLast=lastFol>0?Math.round(lastSub/lastFol):0;
+  const totalFol=fol.reduce((a,b)=>a+b,0);
+  const pctMax=Math.round(total/maxTotal*100);
+  const momArr=sub.map((v,i)=>i===0?null:pct(v,sub[i-1]));
+  const trendClass=trendTotal===null?'neutral':trendTotal>5?'up':trendTotal<-5?'down':'neutral';
+  const lastMes=mesLabels[n-1], firstMes=mesLabels[0];
+
+  let monthCards='';
+  for(let i=0;i<n;i++){
+    const v=sub[i],f=fol[i];
+    const isPeak=v===maxV&&v>0;
+    const isLow=v===minV&&v>0&&v!==maxV;
+    const mom=momArr[i];
+    const momClass=mom===null?'neutral':mom>5?'up':mom<-5?'down':'neutral';
+    const barW=maxV>0?Math.round(v/maxV*100):0;
+    monthCards+=`<div class="month-card${isPeak?' peak':isLow?' low':''}">
+      <div class="month-lbl">${mesLabels[i]}${isPeak?' ★':''}${isLow?' ↓':''}</div>
+      <div class="month-val">${v>0?fmt(v):'—'}</div>
+      <div class="month-fol">${f>0?f+' folios':'—'}</div>
+      <div class="month-chg ${momClass}">${mom!==null?fmtPct(mom):'base'}</div>
+      <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%"></div></div>
+    </div>`;
+  }
+
+  // Narrativa automática basada en datos
+  const trendLabel = trendTotal!==null?fmtPct(trendTotal):'N/D';
+  const peakMes = mesLabels[sub.indexOf(maxV)];
+  const lowMes = nonZero.length?mesLabels[sub.findIndex(v=>v===minV&&v>0)]:'—';
+  const momLastLabel = momLast!==null?fmtPct(momLast):'—';
+
+  const logro = total>0
+    ? `Gasto acumulado ${firstMes}–${lastMes}: <strong>${fmt(total)}</strong> en <strong>${totalFol}</strong> folios. Mes pico: <strong>${peakMes}</strong> con ${fmt(maxV)}.`
+    : 'Sin actividad registrada en el período.';
+
+  const riesgo = trendTotal!==null&&trendTotal<-10
+    ? `Tendencia negativa: <strong>${trendLabel}</strong> en el período (${firstMes}→${lastMes}). Riesgo de pérdida de cliente activo.`
+    : momLast!==null&&momLast<-15
+    ? `Caída fuerte en ${lastMes}: <strong>${momLastLabel}</strong> vs mes anterior. Investigar causa.`
+    : trendTotal!==null&&trendTotal>50
+    ? `Crecimiento acelerado (+${trendLabel}). Validar capacidad operativa para sostener el volumen.`
+    : `Costo/folio de ${lastMes}: <strong>${fmtFull(cpfLast)}</strong>. Monitorear variaciones para identificar alza en correctivos.`;
+
+  const oportunidad = ene===0&&lastSub>0
+    ? `Cliente nuevo en el período. Primer mes activo con ${fmt(lastSub)} y ${lastFol} folios. Costo/folio: ${fmtFull(cpfLast)}.`
+    : lastFol>0
+    ? `${lastFol} folios en ${lastMes} con costo/folio de ${fmtFull(cpfLast)}. ${cpfLast>10000?'Ticket alto — posibles mantenimientos mayores o flota pesada.':'Ticket estable. Potencial de plan preventivo para reducir correctivos.'}`
+    : 'Sin folios en el último mes. Validar estado de flota.';
+
+  const rec = trendTotal!==null&&trendTotal<-15
+    ? `Contacto proactivo urgente. Revisar historial de servicio y satisfacción. ¿Reducción de flota o cambio de proveedor?`
+    : trendTotal!==null&&trendTotal>30
+    ? `Asignar ejecutivo de cuenta dedicado. Proponer contrato de mantenimiento preventivo anual con tarifa negociada por volumen.`
+    : `Revisar composición correctivos/preventivos. Negociar tarifa marco con base en histórico. Meta: reducir costo/folio 8–12%.`;
+
+  return`
+    <div class="client-header">
+      <div>
+        <div class="client-name">${c.name}</div>
+        <div class="client-tipo">${firstMes} – ${lastMes}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:20px;font-weight:700;font-family:'DM Mono',monospace" class="${trendClass}">${trendLabel}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">${firstMes}→${lastMes} · Total ${fmt(total)}</div>
+      </div>
+    </div>
+    <div class="sparkbar-wrap"><div class="sparkbar" style="width:${pctMax}%"></div></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Gasto ${lastMes}</div><div class="kpi-val">${fmt(lastSub)}</div><div class="kpi-sub ${momLast&&momLast>0?'up':'down'}">${momLast?fmtPct(momLast):'—'} vs mes ant.</div></div>
+      <div class="kpi"><div class="kpi-label">Folios totales</div><div class="kpi-val">${totalFol}</div><div class="kpi-sub neutral">${lastFol} en ${lastMes}</div></div>
+      <div class="kpi"><div class="kpi-label">Costo/folio ${lastMes}</div><div class="kpi-val">${cpfLast>0?fmtFull(cpfLast):'—'}</div><div class="kpi-sub neutral">MXN por servicio</div></div>
+      <div class="kpi"><div class="kpi-label">Participación</div><div class="kpi-val">${pctMax}%</div><div class="kpi-sub neutral">del mayor cliente</div></div>
+    </div>
+    <div class="section-title">Evolución mensual</div>
+    <div class="month-track">${monthCards}</div>
+    <div class="section-title">Análisis ejecutivo</div>
+    <div class="exec-grid">
+      <div class="exec-card"><div class="exec-card-label">Logro del período</div><div class="exec-card-text">${logro}</div></div>
+      <div class="exec-card"><div class="exec-card-label">Principal riesgo</div><div class="exec-card-text">${riesgo}</div></div>
+      <div class="exec-card"><div class="exec-card-label">Oportunidad</div><div class="exec-card-text">${oportunidad}</div></div>
+      <div class="exec-card"><div class="exec-card-label">Recomendación</div><div class="exec-card-text">${rec}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div class="action-row">
+      <button class="btn-primary" onclick="window.open('https://metabase.sfleet.com','_blank')">Ver en Metabase ↗</button>
+      <button class="btn-secondary" onclick="window.print()">Exportar PDF</button>
+    </div>`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// RENDER
+// ─────────────────────────────────────────────────────────────
+function render(clients, mesLabels){
+  const maxTotal = clients[0].sub.reduce((a,b)=>a+b,0);
+  const nav = document.getElementById('nav');
+  const views = document.getElementById('views');
+  nav.innerHTML='';
+  views.innerHTML='';
+
+  // General tab
+  const genBtn = document.createElement('button');
+  genBtn.className='nav-btn general-btn active';
+  genBtn.textContent='📊 Resumen General';
+  genBtn.onclick=()=>activate('general', genBtn);
+  nav.appendChild(genBtn);
+
+  const genDiv = document.createElement('div');
+  genDiv.className='view active';
+  genDiv.id='view-general';
+  genDiv.innerHTML = buildGeneral(clients, mesLabels);
+  views.appendChild(genDiv);
+
+  // Client tabs
+  clients.forEach((c,i)=>{
+    const btn = document.createElement('button');
+    btn.className='nav-btn';
+    btn.textContent = c.name;
+    btn.onclick=()=>activate('client-'+i, btn);
+    nav.appendChild(btn);
+
+    const div = document.createElement('div');
+    div.className='view';
+    div.id='view-client-'+i;
+    div.innerHTML = buildClientView(c, mesLabels, maxTotal);
+    views.appendChild(div);
+  });
+}
+
+function activate(id, btn){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ─────────────────────────────────────────────────────────────
+// LOAD DATA
+// ─────────────────────────────────────────────────────────────
+async function loadData(){
+  document.getElementById('loading').style.display='block';
+  document.getElementById('content').style.display='none';
+  document.getElementById('error').style.display='none';
+
+  try{
+    const url = getSheetUrl();
+    const res = await fetch(url);
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const rows = parseCSV(text);
+    const {clients, mesLabels} = buildClientData(rows);
+
+    if(!clients.length) throw new Error('Sin datos en la hoja.');
+
+    render(clients, mesLabels);
+    const now = new Date().toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    document.getElementById('last-update').textContent='Actualizado: '+now;
+    document.getElementById('loading').style.display='none';
+    document.getElementById('content').style.display='block';
+  }catch(e){
+    document.getElementById('loading').style.display='none';
+    const errEl = document.getElementById('error');
+    errEl.style.display='block';
+    errEl.innerHTML=`<strong>Error al cargar datos:</strong> ${e.message}<br><br>
+    Verifica que:<br>
+    1. El SHEET_ID en el código sea correcto<br>
+    2. La hoja de Google Sheets esté publicada como "Cualquiera con el enlace puede ver"<br>
+    3. El nombre de la pestaña coincida con la variable SHEET_NAME<br><br>
+    <button onclick="loadData()" style="margin-top:8px;padding:6px 14px;background:var(--blue-dark);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Reintentar</button>`;
+  }
+}
+
+loadData();
+</script>
+</body>
+</html>
