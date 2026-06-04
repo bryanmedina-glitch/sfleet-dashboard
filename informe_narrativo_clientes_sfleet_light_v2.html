@@ -1,0 +1,350 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.app{background:#f8f9fc;min-height:100vh;padding:20px;font-family:'Arial',sans-serif;color:#1F4E79}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;background:#1F4E79;padding:14px 18px;border-radius:10px}
+.top-bar h1{font-size:12px;font-weight:400;color:#BDD7EE;letter-spacing:2px;text-transform:uppercase}
+.top-bar .period{font-size:12px;color:#EF9F27;letter-spacing:1px;font-weight:700}
+.client-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+.nav-btn{background:#ffffff;border:1px solid #BDD7EE;color:#2E75B6;padding:6px 12px;font-size:11px;border-radius:6px;cursor:pointer;transition:all .2s;letter-spacing:.5px}
+.nav-btn:hover{border-color:#2E75B6;background:#EBF3FB;color:#1F4E79}
+.nav-btn.active{background:#1F4E79;color:#ffffff;border-color:#1F4E79;font-weight:700}
+.nav-btn.general{background:#EBF3FB;border-color:#2E75B6;color:#1F4E79;font-weight:700}
+.nav-btn.general.active{background:#1F4E79;color:#fff}
+.client-view{display:none}
+.client-view.active{display:block}
+/* shared cards */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:#ffffff;border:1px solid #BDD7EE;border-radius:8px;padding:14px 12px}
+.kpi-label{font-size:10px;color:#888;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.kpi-val{font-size:18px;font-weight:700;color:#1F4E79}
+.kpi-sub{font-size:11px;margin-top:3px}
+.up{color:#ED7D31}.down{color:#70AD47}.neutral{color:#888}
+.section-title{font-size:9px;color:#2E75B6;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:700}
+.divider{height:1px;background:#EBF3FB;margin:14px 0}
+.exec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.exec-card{background:#ffffff;border:1px solid #BDD7EE;border-radius:8px;padding:14px}
+.exec-card-label{font-size:9px;color:#2E75B6;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.exec-card-text{font-size:12px;color:#444;line-height:1.6}
+/* general specific */
+.gen-month-track{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.gen-month-card{background:#ffffff;border:1px solid #BDD7EE;border-radius:8px;padding:12px 10px;text-align:center}
+.gen-month-card.peak{border-color:#2E75B6;border-width:2px}
+.gen-month-lbl{font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.gen-month-val{font-size:14px;font-weight:700;color:#1F4E79}
+.gen-month-fol{font-size:10px;color:#888;margin-top:2px}
+.gen-month-chg{font-size:11px;font-weight:700;margin-top:4px}
+.bar-mini{height:3px;border-radius:2px;margin-top:6px;background:#EBF3FB;overflow:hidden}
+.bar-mini-fill{height:3px;background:#2E75B6;border-radius:2px}
+.rank-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:18px}
+.rank-table th{font-size:9px;color:#2E75B6;letter-spacing:1.5px;text-transform:uppercase;padding:7px 10px;border-bottom:2px solid #BDD7EE;text-align:left;background:#EBF3FB}
+.rank-table td{padding:7px 10px;border-bottom:1px solid #EBF3FB;vertical-align:middle}
+.rank-table tr:last-child td{border-bottom:none}
+.rank-num{font-size:11px;color:#888;width:24px}
+.rank-bar-wrap{background:#EBF3FB;border-radius:3px;height:6px;width:100px;overflow:hidden;display:inline-block;vertical-align:middle;margin-left:8px}
+.rank-bar-fill{height:6px;background:#2E75B6;border-radius:3px}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+.badge-up{background:#FEF0E4;color:#ED7D31}
+.badge-down{background:#EAF3DE;color:#70AD47}
+.badge-alert{background:#FDECEA;color:#C0392B}
+/* client specific */
+.sparkbar-wrap{background:#BDD7EE;border-radius:4px;height:5px;margin-bottom:18px;overflow:hidden}
+.sparkbar{height:5px;border-radius:4px;background:#2E75B6}
+.month-track{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:18px}
+.month-card{background:#ffffff;border:1px solid #BDD7EE;border-radius:8px;padding:12px 10px;text-align:center}
+.month-card.peak{border-color:#2E75B6;border-width:2px}
+.month-card.low{border-color:#70AD47;border-width:2px}
+.month-lbl{font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.month-val{font-size:13px;font-weight:700;color:#1F4E79}
+.month-fol{font-size:10px;color:#888;margin-top:2px}
+.month-chg{font-size:11px;font-weight:700;margin-top:4px}
+.tipo-badge{font-size:11px;color:#2E75B6;letter-spacing:.5px;margin-top:2px}
+.client-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px}
+.client-name{font-size:22px;font-weight:700;color:#1F4E79}
+</style>
+
+<div class="app">
+<div class="top-bar">
+  <h1>Sfleet — Informe ejecutivo por cliente</h1>
+  <span class="period">Enero – Mayo 2026</span>
+</div>
+<div class="client-nav" id="nav"></div>
+<div id="views"></div>
+</div>
+
+<script>
+const MES=['Ene','Feb','Mar','Abr','May'];
+const CLIENTS=[
+  {name:'Grupo Bafar',tipo:'Industrial',sub:[4725366,4557446,4581150,3545963,4485151],fol:[553,541,612,479,532]},
+  {name:'Urrea',tipo:'Industrial',sub:[729308,662654,684635,591715,761475],fol:[64,73,70,53,70]},
+  {name:'Casofin',tipo:'Financiero',sub:[345855,319637,372953,312219,535480],fol:[92,86,71,71,118]},
+  {name:'EYMSA',tipo:'Energía',sub:[237187,414727,363217,403759,466497],fol:[30,48,52,42,52]},
+  {name:'Valtrum y Centrum',tipo:'Retail',sub:[265029,244495,276783,210257,258263],fol:[35,29,42,22,40]},
+  {name:'Ragasa',tipo:'Alimentos',sub:[154756,168019,181555,412156,331571],fol:[30,25,38,64,67]},
+  {name:'Tecnocontrol',tipo:'Tecnología',sub:[187634,113087,207639,253541,217342],fol:[27,18,28,31,29]},
+  {name:'Jugos Del Valle',tipo:'Alimentos',sub:[106284,143445,105519,55565,72786],fol:[21,23,20,11,12]},
+  {name:'Natgas',tipo:'Energía',sub:[38592,54551,62041,62298,68050],fol:[8,9,12,10,14]},
+  {name:'Arrendadora Coppel',tipo:'Financiero',sub:[0,0,13384,16064,213571],fol:[0,0,3,4,23]},
+  {name:'Agua Óptima',tipo:'Industrial',sub:[0,0,76646,126801,74963],fol:[0,0,10,16,8]},
+  {name:'ALSEA',tipo:'Alimentos',sub:[0,0,1900,57959,54562],fol:[0,0,1,22,19]},
+  {name:'Beta Leasing',tipo:'Financiero',sub:[12842,75364,44718,42312,14528],fol:[3,6,8,9,2]},
+  {name:'HEB',tipo:'Retail',sub:[46690,15476,11628,19913,11110],fol:[6,4,2,7,3]},
+  {name:'ABR Servicio & Hospitalidad',tipo:'Servicios',sub:[0,0,0,0,43169],fol:[0,0,0,0,6]},
+];
+
+const maxTotal=Math.max(...CLIENTS.map(c=>c.sub.reduce((a,b)=>a+b,0)));
+function fmt(n){if(n>=1000000)return'$'+(n/1000000).toFixed(2)+'M';if(n>=1000)return'$'+(n/1000).toFixed(0)+'k';return'$'+Math.round(n).toLocaleString()}
+function fmtFull(n){return'$'+Math.round(n).toLocaleString()}
+function fmtPct(n){return(n>0?'+':'')+n.toFixed(1)+'%'}
+function pct(a,b){return b===0?null:((a-b)/b)*100}
+
+// ── GENERAL VIEW ──────────────────────────────────────────────
+function buildGeneral(){
+  const totSub=MES.map((_,i)=>CLIENTS.reduce((s,c)=>s+c.sub[i],0));
+  const totFol=MES.map((_,i)=>CLIENTS.reduce((s,c)=>s+c.fol[i],0));
+  const grandTotal=totSub.reduce((a,b)=>a+b,0);
+  const grandFol=totFol.reduce((a,b)=>a+b,0);
+  const maxMes=Math.max(...totSub);
+  const momArr=totSub.map((v,i)=>i===0?null:pct(v,totSub[i-1]));
+  const trendTotal=pct(totSub[4],totSub[0]);
+  const cpfMay=totFol[4]>0?Math.round(totSub[4]/totFol[4]):0;
+
+  // month cards
+  let monthCards='';
+  for(let i=0;i<5;i++){
+    const isPeak=totSub[i]===maxMes;
+    const mom=momArr[i];
+    const momClass=mom===null?'neutral':mom>5?'up':mom<-5?'down':'neutral';
+    const barW=Math.round(totSub[i]/maxMes*100);
+    monthCards+=`<div class="gen-month-card${isPeak?' peak':''}">
+      <div class="gen-month-lbl">${MES[i]}${isPeak?' ★':''}</div>
+      <div class="gen-month-val">${fmt(totSub[i])}</div>
+      <div class="gen-month-fol">${totFol[i].toLocaleString()} folios</div>
+      <div class="gen-month-chg ${momClass}">${mom!==null?fmtPct(mom):'base'}</div>
+      <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%"></div></div>
+    </div>`;
+  }
+
+  // ranking table
+  const ranked=[...CLIENTS].sort((a,b)=>b.sub.reduce((x,y)=>x+y,0)-a.sub.reduce((x,y)=>x+y,0));
+  let rankRows='';
+  ranked.forEach((c,i)=>{
+    const tot=c.sub.reduce((a,b)=>a+b,0);
+    const may=c.sub[4],ene=c.sub[0];
+    const trend=ene>0?pct(may,ene):null;
+    const tClass=trend===null?'neutral':trend>10?'up':trend<-10?'down':'neutral';
+    const tLabel=trend!==null?fmtPct(trend):'nuevo';
+    const share=Math.round(tot/grandTotal*100);
+    const barW=Math.round(tot/maxTotal*100);
+    const isAlert=trend!==null&&trend<-15;
+    rankRows+=`<tr>
+      <td class="rank-num">${i+1}</td>
+      <td style="font-weight:600;color:#1F4E79">${c.name}<span style="font-size:10px;color:#888;font-weight:400;margin-left:6px">${c.tipo}</span></td>
+      <td style="font-weight:700;color:#1F4E79">${fmt(tot)}<div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${barW}%"></div></div></td>
+      <td style="text-align:center;color:#888">${share}%</td>
+      <td style="text-align:center"><span class="${tClass}" style="font-weight:700">${tLabel}</span>${isAlert?'<span class="badge badge-alert" style="margin-left:4px">⚠</span>':''}</td>
+      <td style="text-align:center;color:#888">${c.fol.reduce((a,b)=>a+b,0)}</td>
+    </tr>`;
+  });
+
+  // top grower & top risk
+  const withHistory=CLIENTS.filter(c=>c.sub[0]>0&&c.sub[4]>0);
+  const topGrower=withHistory.slice().sort((a,b)=>pct(b.sub[4],b.sub[0])-pct(a.sub[4],a.sub[0]))[0];
+  const topRisk=withHistory.slice().sort((a,b)=>pct(a.sub[4],a.sub[0])-pct(b.sub[4],b.sub[0]))[0];
+  const newClients=CLIENTS.filter(c=>c.sub[0]===0&&c.sub[4]>0).map(c=>c.name).join(', ');
+  const bafar=CLIENTS[0];
+  const bafarShare=Math.round(bafar.sub.reduce((a,b)=>a+b,0)/grandTotal*100);
+
+  return`<div class="client-view active" id="view-general">
+    <div style="margin-bottom:18px">
+      <div style="font-size:22px;font-weight:700;color:#1F4E79">Resumen General del Portafolio</div>
+      <div style="font-size:11px;color:#888;margin-top:2px">15 clientes · Responsible payment: Sfleet · Ene–May 2026</div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi">
+        <div class="kpi-label">Gasto total período</div>
+        <div class="kpi-val">${fmt(grandTotal)}</div>
+        <div class="kpi-sub neutral">5 meses acumulado</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Gasto mayo 2026</div>
+        <div class="kpi-val">${fmt(totSub[4])}</div>
+        <div class="kpi-sub up">${fmtPct(momArr[4])} vs abril</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Folios totales</div>
+        <div class="kpi-val">${grandFol.toLocaleString()}</div>
+        <div class="kpi-sub neutral">${totFol[4].toLocaleString()} en mayo</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Costo / folio mayo</div>
+        <div class="kpi-val">${fmtFull(cpfMay)}</div>
+        <div class="kpi-sub neutral">MXN por servicio</div>
+      </div>
+    </div>
+
+    <div class="section-title">Evolución mensual del portafolio</div>
+    <div class="gen-month-track">${monthCards}</div>
+
+    <div class="section-title">Ranking de clientes por gasto total</div>
+    <div style="background:#fff;border:1px solid #BDD7EE;border-radius:8px;overflow:hidden;margin-bottom:18px">
+      <table class="rank-table">
+        <thead><tr>
+          <th>#</th><th>Cliente</th><th>Gasto total</th><th>Participación</th><th>Var ene→may</th><th>Folios</th>
+        </tr></thead>
+        <tbody>${rankRows}</tbody>
+      </table>
+    </div>
+
+    <div class="section-title">Resumen ejecutivo del portafolio</div>
+    <div class="exec-grid">
+      <div class="exec-card">
+        <div class="exec-card-label">Tendencia general</div>
+        <div class="exec-card-text">El portafolio cerró mayo en <strong>${fmt(totSub[4])}</strong> (${fmtPct(trendTotal)} vs enero). Mayo fue el mes de mayor gasto con ${totFol[4].toLocaleString()} folios y costo/folio de ${fmtFull(cpfMay)} MXN. El período más débil fue abril con ${fmt(totSub[3])} (${fmtPct(momArr[3])} vs marzo).</div>
+      </div>
+      <div class="exec-card">
+        <div class="exec-card-label">Principal riesgo</div>
+        <div class="exec-card-text">Concentración crítica: <strong>Grupo Bafar</strong> representa el <strong>${bafarShare}%</strong> del gasto total. Su caída de abril (-22.6%) arrastró el portafolio completo. Además, <strong>Jugos del Valle</strong> muestra contracción sostenida (-31.5% ene→may). Dos señales de alerta simultáneas.</div>
+      </div>
+      <div class="exec-card">
+        <div class="exec-card-label">Mayores crecimientos</div>
+        <div class="exec-card-text"><strong>${topGrower.name}</strong> lidera el crecimiento con ${fmtPct(pct(topGrower.sub[4],topGrower.sub[0]))} ene→may. <strong>Arrendadora Coppel</strong> y <strong>ABR Servicio</strong> se incorporaron al portafolio activo en el período. Nuevos clientes activos: ${newClients}.</div>
+      </div>
+      <div class="exec-card">
+        <div class="exec-card-label">Recomendaciones clave</div>
+        <div class="exec-card-text">1. Reducir dependencia de Bafar a máximo 50% del portafolio. 2. Plan de retención urgente para <strong>${topRisk.name}</strong> (${fmtPct(pct(topRisk.sub[4],topRisk.sub[0]))}). 3. Escalar acompañamiento a Casofin y EYMSA por crecimiento acelerado. 4. Benchmark de costo/folio por sector.</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="sendPrompt('Dame un análisis ejecutivo completo del portafolio Sfleet enero-mayo 2026: concentración de clientes, riesgos y estrategia de crecimiento para H2 2026')" style="background:#1F4E79;border:none;color:#fff;padding:7px 14px;font-size:11px;border-radius:6px;cursor:pointer">Análisis estratégico H2 2026 ↗</button>
+      <button onclick="sendPrompt('¿Cómo reducir la concentración de Grupo Bafar en el portafolio Sfleet del 60% actual a menos del 50%?')" style="background:#ffffff;border:1px solid #BDD7EE;color:#2E75B6;padding:7px 14px;font-size:11px;border-radius:6px;cursor:pointer">Diversificar portafolio ↗</button>
+    </div>
+  </div>`;
+}
+
+// ── CLIENT VIEW ───────────────────────────────────────────────
+function getNarrative(c){
+  const sub=c.sub,fol=c.fol;
+  const total=sub.reduce((a,b)=>a+b,0);
+  const may=sub[4],abr=sub[3],ene=sub[0];
+  const momMay=pct(may,abr);
+  const cpfMay=fol[4]>0?may/fol[4]:0;
+  const cpfEne=fol[0]>0?ene/fol[0]:0;
+  let logro='',riesgo='',oportunidad='',rec='';
+  if(c.name==='Grupo Bafar'){logro=`Cliente ancla del portafolio. Gasto total ${fmtFull(total)} en 5 meses. Mayo ${fmtFull(may)}, recuperación del ${momMay?fmtPct(momMay):''} tras el mínimo de abril.`;riesgo=`Concentración: representa ~60% del gasto total de la cartera. Caída de abril (-22.6%) impactó el total general. Alta dependencia operativa.`;oportunidad=`${fol[4]} folios en mayo. Costo/folio ${fmtFull(Math.round(cpfMay))} vs ${fmtFull(Math.round(cpfEne))} en enero. Oportunidad de negociar tarifa marco.`;rec=`Revisión de programa preventivo para reducir correctivos. Evaluar costo/folio por tipo de unidad.`;}
+  else if(c.name==='Casofin'){logro=`Crecimiento más acelerado del período: de ${fmtFull(ene)} en enero a ${fmtFull(may)} en mayo. Folios de 92 a 118 (+28.3%).`;riesgo=`Volatilidad alta: -16.3% en abril, luego +71.5% en mayo. Patrón irregular sugiere mantenimientos reactivos.`;oportunidad=`Con 118 folios en mayo, es el cliente con mayor volumen de servicios. Potencial para plan preventivo estructurado.`;rec=`Implementar programa de mantenimiento preventivo. Investigar pico de mayo: ¿correctivos o flota nueva?`;}
+  else if(c.name==='EYMSA'){logro=`Mayor crecimiento YTD: +96.7% de enero a mayo (${fmtFull(ene)} → ${fmtFull(may)}). Presencia creciente y sostenida.`;riesgo=`Costo/folio variable: $7,906 ene → $9,613 abr → $8,971 may. Oscilación en tipo de servicio.`;oportunidad=`52 folios en mayo. Crecimiento de flota activa evidente. Cliente en expansión ideal para propuesta integral.`;rec=`Proponer contrato de mantenimiento preventivo anual. Fijar tarifa marco para estabilizar costo/folio.`;}
+  else if(c.name==='Urrea'){const t=pct(may,ene);logro=`Crecimiento moderado y estable: ${t!==null?fmtPct(t):''} ene→may. Mayo fue el mes pico con ${fmtFull(may)} en 70 folios.`;riesgo=`Caída pronunciada en abril (-13.6%, 53 folios). Posible impacto vacacional o pausa operativa.`;oportunidad=`Costo/folio estable ~$10k-$11k. Cliente con comportamiento predecible, ideal para proyección.`;rec=`Aprovechar previsibilidad para negociar paquete preventivo Q3. Monitorear recuperación post-abril.`;}
+  else if(c.name==='Ragasa'){logro=`Crecimiento explosivo: +114.3% ene→may. Pico en abril con ${fmtFull(sub[3])} (64 folios), posible incorporación de flota nueva.`;riesgo=`Caída de -19.6% en mayo tras el pico de abril. Evaluar si el pico fue puntual o señal de flota creciente.`;oportunidad=`De 30 a 67 folios en 5 meses. Si el crecimiento de flota es real, potencial para duplicar facturación.`;rec=`Visita ejecutiva para validar tamaño actual de flota. Proponer revisión preventiva mensual.`;}
+  else if(c.name==='Valtrum y Centrum'){logro=`Comportamiento cíclico: sube en meses impares, baja en pares. Total ${fmtFull(total)} en 5 meses.`;riesgo=`Folios muy variables: de 22 (abril) a 42 (marzo). Costo/folio en abril fue el más alto ($9,557).`;oportunidad=`Con estabilización podría mantener ~35 folios/mes. Patrón predecible para optimización.`;rec=`Analizar por qué abril baja consistentemente. Ajustar calendario preventivo para nivelar demanda.`;}
+  else if(c.name==='Tecnocontrol'){logro=`Recuperación fuerte: mínimo en febrero ($113k, 18 folios) pero cerró mayo en ${fmtFull(may)} con 29 folios.`;riesgo=`Caída de -39.7% en febrero fue la más pronunciada del cliente. Evento puntual no explicado.`;oportunidad=`Estabilización en rango $150k-$250k desde marzo. Potencial de crecimiento si se amplía flota.`;rec=`Investigar caída de febrero. Establecer mínimo de servicio mensual para garantizar continuidad.`;}
+  else if(c.name==='Jugos Del Valle'){logro=`Activo desde enero con presencia constante. Pico en febrero ($143k, 23 folios).`;riesgo=`Tendencia negativa fuerte: -31.5% ene→may. Abril fue mínimo con $55k y solo 11 folios. Cliente en contracción.`;oportunidad=`Costo/folio estable ~$5k-$6k. Si se reactiva flota, el ticket promedio es conocido y manejable.`;rec=`Contacto proactivo para entender reducción. ¿Reducción de flota? ¿Cambio de proveedor? Atención urgente.`;}
+  else if(c.name==='Natgas'){logro=`Crecimiento sostenido: +76.3% ene→may. De 8 a 14 folios. Tendencia positiva consistente.`;riesgo=`Volumen aún pequeño ($68k en mayo). Alta variabilidad porcentual por base pequeña.`;oportunidad=`Crecimiento constante en todos los meses. Potencial de desarrollo si se amplía flota.`;rec=`Asignar ejecutivo de cuenta. Presentar propuesta de crecimiento con base en tendencia actual.`;}
+  else if(c.name==='Arrendadora Coppel'){logro=`Incorporación dinámica: aparece en marzo y escala a ${fmtFull(may)} en mayo (23 folios). Crecimiento +1,295% mar→may.`;riesgo=`Cliente muy nuevo, sin historial suficiente. El pico de mayo puede ser incorporación inicial de flota.`;oportunidad=`Si los 23 folios de mayo representan flota establecida, puede convertirse en cliente top 5.`;rec=`Visita de bienvenida y diagnóstico de flota. Definir plan de mantenimiento desde el inicio.`;}
+  else if(c.name==='Agua Óptima'){logro=`Activo desde marzo. Pico en abril ($126k, 16 folios). Costo/folio más alto de su segmento: ~$9,370.`;riesgo=`Caída en mayo (-40.9%). Solo 8 folios. Evaluar si es pausa o reducción real.`;oportunidad=`El costo/folio elevado sugiere unidades de mayor complejidad. Potencial de especialización.`;rec=`Confirmar estado de flota en junio. Proponer revisión preventiva para evitar correctivos costosos.`;}
+  else if(c.name==='ALSEA'){logro=`Incorporación desde marzo. Abril fue el pico ($57.9k, 22 folios). Mayo estable con $54.6k y 19 folios.`;riesgo=`Volumen modesto aún. Costo/folio bajo ($2,871 en mayo) sugiere servicios menores o unidades ligeras.`;oportunidad=`Cadena con flota distribuida nacional. Si se capturan más unidades, potencial de escala alto.`;rec=`Mapear total de flota ALSEA. Propuesta de servicio nacional con cobertura multi-ciudad.`;}
+  else if(c.name==='Beta Leasing'){logro=`Pico en febrero ($75k, 6 folios). Cliente irregular con presencia en todos los meses.`;riesgo=`Fuerte caída en mayo (-65.7%, solo 2 folios). Tendencia preocupante al cierre del período.`;oportunidad=`Como arrendadora, el volumen puede crecer si se incorporan nuevos contratos de flota.`;rec=`Reunión con área de arrendamiento. Evaluar qué ocasionó el pico de febrero y la caída de mayo.`;}
+  else if(c.name==='HEB'){logro=`Activo desde enero. Pico inicial en enero ($46.7k, 6 folios). Costo/folio de $7,782.`;riesgo=`Contracción severa: -76.2% ene→may. De 6 a solo 3 folios. Tendencia negativa sostenida.`;oportunidad=`Cadena retail con flota de distribución. Si se recupera el volumen inicial, hay potencial real.`;rec=`Contacto urgente para entender reducción. Auditoría de servicio para detectar problemas de satisfacción.`;}
+  else{logro=`Nuevo cliente incorporado en mayo 2026. Primer mes con ${fmtFull(may)} en 6 folios. CPF: $7,195.`;riesgo=`Sin historial previo. Un mes no permite identificar tendencias ni estacionalidad.`;oportunidad=`Sector hospitalidad con flota operativa. Potencial de crecimiento si la experiencia inicial es positiva.`;rec=`Seguimiento post-servicio inmediato. Encuesta de satisfacción y presentación de portafolio preventivo.`;}
+  return{logro,riesgo,oportunidad,rec};
+}
+
+function buildView(c,idx){
+  const sub=c.sub,fol=c.fol;
+  const total=sub.reduce((a,b)=>a+b,0);
+  const may=sub[4],abr=sub[3],ene=sub[0];
+  const momMay=pct(may,abr);
+  const trendTotal=ene>0?pct(may,ene):null;
+  const maxV=Math.max(...sub);
+  const nonZero=sub.filter(v=>v>0);
+  const minV=nonZero.length?Math.min(...nonZero):0;
+  const cpfMay=fol[4]>0?Math.round(may/fol[4]):0;
+  const totalFol=fol.reduce((a,b)=>a+b,0);
+  const pctMax=Math.round(total/maxTotal*100);
+  const{logro,riesgo,oportunidad,rec}=getNarrative(c);
+  const momArr=sub.map((v,i)=>i===0?null:pct(v,sub[i-1]));
+  const trendClass=trendTotal===null?'neutral':trendTotal>5?'up':trendTotal<-5?'down':'neutral';
+  const trendLabel=trendTotal!==null?fmtPct(trendTotal):'N/D';
+  const momMayClass=momMay===null?'neutral':momMay>5?'up':momMay<-5?'down':'neutral';
+  const momMayLabel=momMay!==null?fmtPct(momMay):'—';
+  let monthCards='';
+  for(let i=0;i<5;i++){
+    const v=sub[i],f=fol[i];
+    const isPeak=v===maxV&&v>0;
+    const isLow=v===minV&&v>0&&v!==maxV;
+    const mom=momArr[i];
+    const momClass=mom===null?'neutral':mom>5?'up':mom<-5?'down':'neutral';
+    const barW=maxV>0?Math.round(v/maxV*100):0;
+    monthCards+=`<div class="month-card${isPeak?' peak':isLow?' low':''}">
+      <div class="month-lbl">${MES[i]}${isPeak?' ★':''}${isLow?' ↓':''}</div>
+      <div class="month-val">${v>0?fmt(v):'—'}</div>
+      <div class="month-fol">${f>0?f+' folios':'—'}</div>
+      <div class="month-chg ${momClass}">${mom!==null?fmtPct(mom):'base'}</div>
+      <div class="bar-mini"><div class="bar-mini-fill" style="width:${barW}%"></div></div>
+    </div>`;
+  }
+  return`<div class="client-view" id="view-${idx}">
+    <div class="client-header">
+      <div><div class="client-name">${c.name}</div><div class="tipo-badge">${c.tipo}</div></div>
+      <div style="text-align:right">
+        <div style="font-size:18px;font-weight:700" class="${trendClass}">${trendLabel} ene→may</div>
+        <div style="font-size:12px;color:#888;margin-top:2px">Total: ${fmt(total)}</div>
+      </div>
+    </div>
+    <div class="sparkbar-wrap"><div class="sparkbar" style="width:${pctMax}%"></div></div>
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">Gasto mayo</div><div class="kpi-val">${fmt(may)}</div><div class="kpi-sub ${momMayClass}">${momMayLabel} vs abril</div></div>
+      <div class="kpi"><div class="kpi-label">Folios totales</div><div class="kpi-val">${totalFol}</div><div class="kpi-sub neutral">${fol[4]} en mayo</div></div>
+      <div class="kpi"><div class="kpi-label">Costo / folio may</div><div class="kpi-val">${cpfMay>0?fmtFull(cpfMay):'—'}</div><div class="kpi-sub neutral">MXN por servicio</div></div>
+      <div class="kpi"><div class="kpi-label">Participación</div><div class="kpi-val">${pctMax}%</div><div class="kpi-sub neutral">del mayor cliente</div></div>
+    </div>
+    <div class="section-title">Evolución mensual</div>
+    <div class="month-track">${monthCards}</div>
+    <div class="section-title">Resumen ejecutivo</div>
+    <div class="exec-grid">
+      <div class="exec-card"><div class="exec-card-label">Logro del período</div><div class="exec-card-text">${logro}</div></div>
+      <div class="exec-card"><div class="exec-card-label">Principal riesgo</div><div class="exec-card-text">${riesgo}</div></div>
+      <div class="exec-card"><div class="exec-card-label">Oportunidad</div><div class="exec-card-text">${oportunidad}</div></div>
+      <div class="exec-card"><div class="exec-card-label">Recomendación</div><div class="exec-card-text">${rec}</div></div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button onclick="sendPrompt('Dame un análisis profundo del cliente ${c.name} en Sfleet: tendencias, riesgos y plan de acción para Q3 2026')" style="background:#1F4E79;border:none;color:#fff;padding:7px 14px;font-size:11px;border-radius:6px;cursor:pointer">Análisis profundo ↗</button>
+      <button onclick="sendPrompt('¿Qué acciones preventivas recomiendas para controlar el costo por folio de ${c.name} que está en $${cpfMay.toLocaleString()} MXN?')" style="background:#ffffff;border:1px solid #BDD7EE;color:#2E75B6;padding:7px 14px;font-size:11px;border-radius:6px;cursor:pointer">Optimizar costo/folio ↗</button>
+    </div>
+  </div>`;
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+const nav=document.getElementById('nav');
+const views=document.getElementById('views');
+
+// General button
+const genBtn=document.createElement('button');
+genBtn.className='nav-btn general active';
+genBtn.textContent='📊 Resumen General';
+genBtn.onclick=()=>{
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.client-view').forEach(v=>v.classList.remove('active'));
+  genBtn.classList.add('active');
+  document.getElementById('view-general').classList.add('active');
+};
+nav.appendChild(genBtn);
+views.innerHTML=buildGeneral();
+
+CLIENTS.forEach((c,i)=>{
+  const btn=document.createElement('button');
+  btn.className='nav-btn';
+  btn.textContent=c.name;
+  btn.onclick=()=>{
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.client-view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+i).classList.add('active');
+  };
+  nav.appendChild(btn);
+  views.innerHTML+=buildView(c,i);
+});
+</script>
